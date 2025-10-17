@@ -1,6 +1,38 @@
 #+title: My Doom Emacs Configuration
 #+startup: overview
 
+* Table of Contents :toc:
+- [[#packages-needs-to-install][Packages needs to install]]
+- [[#script][script]]
+  - [[#visual-script][visual script]]
+  - [[#export-to-excel][export to excel]]
+  - [[#set-to-default-editor][set to default editor]]
+- [[#basics][Basics]]
+- [[#better-defaults][Better defaults]]
+- [[#font-config][Font config]]
+- [[#dashboard-setup][Dashboard setup]]
+- [[#calulator][Calulator]]
+  - [[#calctex][CalcTex]]
+  - [[#defaults][Defaults]]
+- [[#plaintext][Plaintext]]
+- [[#org-mode][Org mode]]
+  - [[#org-mode-itself][Org mode itself]]
+  - [[#transclusion][Transclusion]]
+  - [[#import-other-files-with-pandoc][Import other files with pandoc]]
+  - [[#cdlatex][cdlatex]]
+  - [[#reveal-export][Reveal Export]]
+  - [[#beamer][Beamer]]
+  - [[#org-latex][Org latex]]
+  - [[#org-noter-deft][org noter deft]]
+  - [[#pandoc][Pandoc]]
+  - [[#org-capture][org capture]]
+  - [[#org-columns][org columns]]
+  - [[#org-id][org id]]
+- [[#novel][Nov.el]]
+- [[#pyim][pyim]]
+- [[#dired][Dired]]
+  - [[#dired-open-in-xdg-open][Dired open in xdg-open]]
+- [[#gemini-cli][Gemini cli]]
 
 * Packages needs to install
 :PROPERTIES:
@@ -61,6 +93,9 @@
 (package! org-contrib :recipe (:host github :repo "emacsmirror/org-contrib"))
 (package! draft-mode)
 (package! empv :recipe (:host github :repo "isamert/empv.el"))
+(package! eat)
+(package! wc-mode :recipe (:host github :repo "bnbeckwith/wc-mode"))
+(package! gemini-cli :recipe (:host github :repo "linchen2chris/gemini-cli.el"))
 #+end_src
 
 * script
@@ -947,34 +982,6 @@ in hooks that call functions with arguments."
 
 Setup End
 
-* COMMENT Emacs Application Framework
-#+begin_src emacs-lisp
-(use-package! eaf
-  :defer t
-  :commands (eaf-open eaf-open-browser eaf-open-browser-other-window eaf-open-browser-with-history)
-  ;;:load-path "~/.config/emacs/.local/straight/repos/emacs-application-framework"
-  ;;:hook (eaf-mode . centaur-tabs-mode)
-  :init
-  ;; maps
-  (map! :leader :desc "eaf search it"
-        "o s e" #'eaf-search-it)
-  (map! :leader :desc "eaf browser with history"
-        "o s b" #'eaf-open-browser-with-history)
-  :custom
-  (eaf-browser-continue-where-left-off t)
-  (eaf-browser-enable-adblocker t)
-  :config
-  (require 'eaf-browser)
-  (require 'eaf-pdf-viewer)
-  (require 'eaf-evil)
-  (setq browse-url-browser-function 'eaf-open-browser)
-  (setq eaf-evil-leader-key "C-SPC")
-  (defalias 'browse-web #'eaf-open-browser)
-  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key nil "M-q" eaf-browser-keybinding)
-  )
-#+end_src
 * Calulator
 ** CalcTex
 For prettier lookup
@@ -1735,6 +1742,4 @@ Reading ~epub~ books
   (define-key dired-mode-map (kbd "M-o") 'my/dired-xdg-open)
   )
 #+end_src
-
-
-orgit:~/.config/doom
+* Gemini cli

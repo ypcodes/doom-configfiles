@@ -52,3 +52,6 @@
 (package! org-contrib :recipe (:host github :repo "emacsmirror/org-contrib"))
 (package! draft-mode)
 (package! empv :recipe (:host github :repo "isamert/empv.el"))
+(package! eat)
+(package! wc-mode :recipe (:host github :repo "bnbeckwith/wc-mode"))
+(package! gemini-cli :recipe (:host github :repo "linchen2chris/gemini-cli.el"))
