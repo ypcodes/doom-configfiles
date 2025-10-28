@@ -15,7 +15,7 @@
   - [[#calctex][CalcTex]]
   - [[#defaults][Defaults]]
 - [[#plaintext][Plaintext]]
-- [[#org-mode][Org mode]]
+- [[#org][Org]]
   - [[#org-mode-itself][Org mode itself]]
   - [[#transclusion][Transclusion]]
   - [[#import-other-files-with-pandoc][Import other files with pandoc]]
@@ -28,11 +28,12 @@
   - [[#org-capture][org capture]]
   - [[#org-columns][org columns]]
   - [[#org-id][org id]]
+  - [[#org-roam][org roam]]
 - [[#novel][Nov.el]]
 - [[#pyim][pyim]]
 - [[#dired][Dired]]
   - [[#dired-open-in-xdg-open][Dired open in xdg-open]]
-- [[#gemini-cli][Gemini cli]]
+- [[#rainbow-delimiters-mode][Rainbow-Delimiters mode]]
 
 * Packages needs to install
 :PROPERTIES:
@@ -96,6 +97,19 @@
 (package! eat)
 (package! wc-mode :recipe (:host github :repo "bnbeckwith/wc-mode"))
 (package! gemini-cli :recipe (:host github :repo "linchen2chris/gemini-cli.el"))
+
+(package! rainbow-delimiters)
+(package! org-download)
+(package! org-fragtog)
+(package! denote)
+(package! alert)
+(package! ef-themes)
+
+(package! dslide :recipe (:host github :repo "positron-solutions/dslide"))
+(unpin! org-roam)
+(package! org-roam-ui)
+
+(package! websocket)
 #+end_src
 
 * script
@@ -373,12 +387,15 @@ xdg-mime default org.mozilla.zen.desktop text/html
 :PROPERTIES:
 :ID:       L20251017.160037_basics
 :END:
+#+begin_src emacs-lisp :tangle yes
+(setq-default elisp-fontify-semantically t)
+#+end_src
+
 Some functionality uses this to identify you, e.g. GPG configuration, email
 clients, file templates and snippets. It is optional.
 #+begin_src emacs-lisp
 (setq user-full-name "Peng Ye"
       user-mail-address "yepeng230@gmail.com")
-
 #+end_src
 
 Doom exposes five (optional) variables for controlling fonts in Doom:
@@ -405,6 +422,7 @@ available. You can either set `doom-theme' or manually load a theme with the
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-one)
 #+end_src
+
 This determines the style of line numbers in effect. If set to `nil', line
 numbers are disabled. For relative line numbers, set this to `relative'.
 #+begin_src emacs-lisp
@@ -415,7 +433,11 @@ If you use `org' and don't want your org files in the default location below,
 change `org-directory'. It must be set before org loads!
 #+begin_src emacs-lisp
 (setq org-directory "~/projects/org/"
-      org-roam-directory "~/projects/org/roam")
+    org-roam-directory "~/projects/org/roam"
+    deft-directory "~/projects/")
+
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font Propo" :size 16 :weight 'semi-light)
+    doom-variable-pitch-font (font-spec :family "Fira Sans" :size 17))
 #+end_src
 
 Here are some additional functions/macros that will help you configure Doom.
@@ -470,11 +492,11 @@ Here are some additional functions/macros that will help you configure Doom.
 #+end_src
 * Font config
 #+begin_src emacs-lisp
-(defun my-cjk-font-setup ()
-  (dolist (charset '(kana han cjk-misc bopomofo))
-    (set-fontset-font t charset (font-spec :family "Noto Sans CJK SC"))))
+;; (defun my-cjk-font-setup ()
+;;   (dolist (charset '(kana han cjk-misc bopomofo))
+;;     (set-fontset-font t charset (font-spec :family "Noto Sans CJK SC"))))
 
-(add-hook 'after-setting-font-hook #'my-cjk-font-setup)
+;; (add-hook 'after-setting-font-hook #'my-cjk-font-setup)
 ;;(setq face-font-rescale-alist '(("Noto Sans CJK SC" . 1.2)))
 #+end_src
 
@@ -1037,17 +1059,33 @@ For prettier lookup
       (with-silent-modifications
         (ansi-color-apply-on-region (point-min) (point-max) t)))))
 #+end_src
-* Org mode
+* Org
+:PROPERTIES:
+:ID:       L20251026.055458_org
+:END:
 ** Org mode itself
 #+begin_src emacs-lisp
 (after! org
   ;;(org-num-mode t)
+  ;;(add-hook 'org-mode-hook 'org-num-mode)
+  ;;(setq org-startup-numerated 't)
   (add-hook 'org-mode-hook 'org-display-inline-images)
-  (require 'ox-extra)
-  (ox-extras-activate '(ignore-headlines))
-)
+;;  (require 'ox-extra)
+  ;;(ox-extras-activate '(ignore-headlines))
+  (setq-default org-startup-folded 'content)
+  (setq-default org-log-done 'note)
+  ;; 在你的 init.el 文件中添加
+  (setq org-hide-emphasis-markers t)
+  (setq org-export-default-options
+        '(;;:section-numbers nil     ; 标题编号 (num:t)
+          :with-toc 3            ; 生成3级目录 (toc:3)
+          :H 3                   ; 标题级别 (H:3)
+          :author nil            ; 默认不导出作者 (author:nil)
+          :creator nil           ; 默认不导出创建者 (creator:nil)
+          :timestamp nil         ; 默认不导出时间戳 (timestamp:nil)
+          :with-sub-superscript "{}")) ; 启用 a^{b} 和 a_{b} 语法 (^:{})
+  )
 #+end_src
-
 #+begin_src emacs-lisp
 (use-package! org-contrib :config
   (require 'ox-extra)
@@ -1127,12 +1165,15 @@ want to edit them afterwards though, so let's make that happen by default.
 \\usepackage{fancyhdr}
 \\usepackage{cancel}
 \\usepackage{mathtools}
+\\usepackage{microtype}
 \\usepackage[xetex,colorlinks=true,CJKbookmarks=true, linkcolor=blue, urlcolor=blue, menucolor=blue]{hyperref}
 \\usepackage{fontspec,xunicode,xltxtra}
 \\newfontinstance\\MONO{\\fontnamemono}
 \\newcommand{\\mono}[1]{{\\MONO #1}}
-\\setCJKmainfont[Scale=0.9]{SimSun}%中文字体
-\\setCJKmonofont[Scale=0.9]{SimSun}
+\\setmainfont{TeX Gyre Pagella}
+\\setCJKmainfont{SimSun}
+\\setCJKsansfont{WenQuanYi Micro Hei}
+\\setCJKmonofont{Sarasa Gothic SC}
 \\hypersetup{unicode=true}
 \\geometry{a4paper, textwidth=6.5in, textheight=10in,marginparsep=7pt, marginparwidth=.6in}
 \\punctstyle{kaiming}
@@ -1228,9 +1269,10 @@ want to edit them afterwards though, so let's make that happen by default.
 \\usepackage{lmodern}
 \\usepackage{fontspec,xunicode,xltxtra}
 \\usepackage{polyglossia}
-\\setmainfont{Times New Roman}
-\\setCJKmainfont{SimSun}
-\\setCJKmonofont{SimSun}
+\\setmainfont{TeX Gyre Pagella}
+\\setCJKmainfont{Source Han Serif SC}
+\\setCJKsansfont{Source Han Sans SC}
+\\setCJKmonofont{Sarasa Gothic SC}
 \\usepackage{verbatim}
 \\usepackage{listings}
 % \\institute{{{{beamerinstitute}}}}
@@ -1244,7 +1286,7 @@ want to edit them afterwards though, so let's make that happen by default.
 #+end_src
 ** org noter deft
 #+begin_src emacs-lisp
-(setq deft-directory "~/projects")
+(setq deft-directory "~/projects/")
 (setq org-noter-notes-search-path '("~/projects"))
 #+end_src
 ** COMMENT org media note
@@ -1289,6 +1331,7 @@ want to edit them afterwards though, so let's make that happen by default.
       ("world"      . "world.org")
       ("dialogue"   . "dialogue.org")
       ("research"   . "research.org")
+      ("poem"       . "poem.org")
       ("tasks"      . "tasks.org"))
     "Assoc list of novel org files (name . filename).")
 
@@ -1315,16 +1358,16 @@ want to edit them afterwards though, so let's make that happen by default.
   ;; 3. Add capture templates safely
   ;; --------------------------------------------------------------------------
   (add-to-list 'org-capture-templates
-               '("n" "Novel Writing") t)  ;; <- prefix key, valid now
+               '("w" "Novel Writing") t)  ;; <- prefix key, valid now
 
   (add-to-list 'org-capture-templates
-               `("ni" "Idea / Inbox" entry
+               `("wi" "Idea / Inbox" entry
                  (file+headline ,(my/novel-file "inbox") "Fleeting Ideas")
                  "* %? :idea:\n:PROPERTIES:\n:Created: %U\n:ID: %(my/uuid)\n:END:\n\n%i\n%a"
                  :empty-lines 1))
 
   (add-to-list 'org-capture-templates
-               `("nc" "Character" entry
+               `("wc" "Character" entry
                  (file ,(my/novel-file "characters"))
                  ,(string-join
                    '("* %? :character:"
@@ -1345,7 +1388,7 @@ want to edit them afterwards though, so let's make that happen by default.
                  :empty-lines 1))
 
   (add-to-list 'org-capture-templates
-               `("ns" "Scene / Plot Point" entry
+               `("ws" "Scene / Plot Point" entry
                  (file+headline ,(my/novel-file "scenes") "Scenes")
                  ,(string-join
                    '("* %? :scene:"
@@ -1369,7 +1412,7 @@ want to edit them afterwards though, so let's make that happen by default.
                  :empty-lines 1))
 
   (add-to-list 'org-capture-templates
-               `("nw" "Worldbuilding / Lore" entry
+               `("ww" "Worldbuilding / Lore" entry
                  (file+headline ,(my/novel-file "world") "World Notes")
                  ,(string-join
                    '("* %? :world:"
@@ -1385,21 +1428,37 @@ want to edit them afterwards though, so let's make that happen by default.
                  :empty-lines 1))
 
   (add-to-list 'org-capture-templates
-               `("nd" "Dialogue Snippet" entry
+               `("wd" "Dialogue Snippet" entry
                  (file+headline ,(my/novel-file "dialogue") "Fragments")
                  "* %U :dialogue:\n%?\n"
                  :empty-lines 1))
 
   (add-to-list 'org-capture-templates
-               `("nr" "Research Note" entry
+               `("wr" "Research Note" entry
                  (file+headline ,(my/novel-file "research") "Notes")
                  "* %? :research:\n:PROPERTIES:\n:Created: %U\n:Source: %a\n:END:\n\n%i\n"
                  :empty-lines 1))
 
   (add-to-list 'org-capture-templates
-               `("nt" "Writing Task" entry
+               `("wt" "Writing Task" entry
                  (file+headline ,(my/novel-file "tasks") "Writing Tasks")
                  "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n:PROPERTIES:\n:Created: %U\n:END:"
+                 :empty-lines 1))
+  (add-to-list 'org-capture-templates
+               `("wp" "Poem / Verse" entry
+                 (file+headline ,(my/novel-file "poem") "Poems")
+                 ,(string-join
+                   '("* %? :poem:"
+                     ":PROPERTIES:"
+                     ":Created: %U"
+                     ":ID: %(my/uuid)"
+                     ":Form:"          ;; e.g. haiku / free verse / sonnet
+                     ":Theme:"         ;; main subject or inspiration
+                     ":END:"
+                     "\n** Draft\n\n"
+                     "** Imagery & Emotion\n\n"
+                     "** Notes / Revisions\n\n")
+                   "\n")
                  :empty-lines 1))
   )
 #+end_src
@@ -1664,15 +1723,29 @@ want to edit them afterwards though, so let's make that happen by default.
 
 #+RESULTS:
 | novel-auto-generate-id-after-snippet |
+** org roam
+#+begin_src emacs-lisp :tangle yes
+(use-package! websocket
+    :after org-roam)
+
+(use-package! org-roam-ui
+    :after org-roam ;; or :after org
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
+#+end_src
 
 * Nov.el
-Reading ~epub~ books
-#+begin_src emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-#+end_src
 * pyim
 #+begin_src emacs-lisp
- (set-language-environment "UTF-8")
+(set-language-environment "UTF-8")
+
 (after! pyim
   (require 'pyim-cregexp-utils)
   (require 'pyim-liberime)
@@ -1721,7 +1794,7 @@ Reading ~epub~ books
 
   ;; 开启代码搜索中文功能（比如拼音，五笔码等）
   (pyim-isearch-mode 1)
-)
+  )
 
 (use-package! pyim-basedict
   :after pyim)
@@ -1742,4 +1815,7 @@ Reading ~epub~ books
   (define-key dired-mode-map (kbd "M-o") 'my/dired-xdg-open)
   )
 #+end_src
-* Gemini cli
+* Rainbow-Delimiters mode
+#+begin_src emacs-lisp
+(rainbow-delimiters-mode)
+#+end_src

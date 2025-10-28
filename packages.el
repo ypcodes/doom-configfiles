@@ -55,3 +55,16 @@
 (package! eat)
 (package! wc-mode :recipe (:host github :repo "bnbeckwith/wc-mode"))
 (package! gemini-cli :recipe (:host github :repo "linchen2chris/gemini-cli.el"))
+
+(package! rainbow-delimiters)
+(package! org-download)
+(package! org-fragtog)
+(package! denote)
+(package! alert)
+(package! ef-themes)
+
+(package! dslide :recipe (:host github :repo "positron-solutions/dslide"))
+(unpin! org-roam)
+(package! org-roam-ui)
+
+(package! websocket)
